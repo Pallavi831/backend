@@ -25,32 +25,30 @@ pipeline {
             }
         }
 
-        stage('Test') { 
+        stage('Install Dependencies') { 
             steps {
-                sh 'echo This is Test' 
-                sh 'env'
+                sh 'npm install' 
+                
             }
         }
-        stage('Deploy') { 
-            when {
-                //branch 'production'
-                expression { env.GIT_BRANCH != "origin/main" } // != means not equal to
-                //expression { env.GIT_BRANCH == "origin/main" } // == equal to
-            }
+        stage('Docker build') { 
+            
             steps {
-                sh 'echo This is Deploy'
-                //error 'pipeline failed'
+                sh """
+                docker build -t pallavi122/backend:${appVersion} .
+                docker images
+                """
             }
         }
-        stage('print params'){
-            steps{
-                echo "Hello ${params.PERSON}"
-                echo "Biography: ${params.BIOGRAPHY}"
-                echo "Toggle: ${params.TOGGLE}"
-                echo "Choice: ${params.CHOICE}"
-                echo "Password: ${params.PASSWORD}" 
-            }
-        }
+        // stage('print params'){
+        //     steps{
+        //         echo "Hello ${params.PERSON}"
+        //         echo "Biography: ${params.BIOGRAPHY}"
+        //         echo "Toggle: ${params.TOGGLE}"
+        //         echo "Choice: ${params.CHOICE}"
+        //         echo "Password: ${params.PASSWORD}" 
+        //     }
+        // }
         // stage('Approval'){
         //     input {
         //         message "Should we continue?"
