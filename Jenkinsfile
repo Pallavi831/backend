@@ -53,23 +53,42 @@ pipeline {
                 }
             }
         }
-        stage('Deploy'){
-            steps{
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                    withAWS(region: "${region}", credentials: 'aws-creds') {
-                        sh """
-                            aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
-                            cd helm
-                            sed -i 's/IMAGE_VERSION/${appVersion}/g' values-${environment}.yaml
-                            helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
-                         """
+//         stage('Deploy'){
+//             steps{
+//                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+//                     withAWS(region: "${region}", credentials: 'aws-creds') {
+//                         sh """
+//                             aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
+//                             cd helm
+//                             sed -i "s|IMAGE_VERSION|${appVersion}|g" values-${environment}.yaml
+//                             sh "kubectl get ns ${project} || kubectl create ns ${project}"
+
+//                             helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
+//                          """
+//     }
+// }
+
+//             }
+//         }
+      
+//     }
+stage('Deploy') {
+    steps {
+        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+            withAWS(region: "${region}", credentials: 'aws-creds') {
+                sh """
+                    aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
+                    kubectl get ns ${project} || kubectl create ns ${project}
+                    cd helm
+                    sed -i "s|IMAGE_VERSION|${env.appVersion}|g" values-${environment}.yaml
+                    helm lint .
+                    helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
+                """
+            }
+        }
     }
 }
 
-            }
-        }
-      
-    }
 
     post {
         always{
