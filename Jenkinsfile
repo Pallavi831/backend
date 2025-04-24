@@ -1,109 +1,196 @@
+// pipeline {
+//     agent {
+//         label 'AGENT-1'
+        
+//     }
+//     options{
+//         timeout(time: 30, unit: 'MINUTES')
+//         disableConcurrentBuilds()
+//         //retry(1)
+
+//     }
+//     environment {
+//         DEBUG = 'true'
+//         appVersion = '' // this will become global , we can use across pipeline
+//         region = 'us-east-1'
+//         account_id = '557690626059'
+//         project = 'expense'
+//         component = 'backend'
+//         environment = 'dev'
+//     }
+   
+//     stages {
+//         stage('Read the version') { 
+//             steps {
+//                 script{
+//                     def packageJson = readJSON file: 'package.json'
+//                     appVersion = packageJson.version
+//                     echo "App version: ${appVersion}"
+//                 }
+//             }
+//         }
+
+//         stage('Install Dependencies') { 
+//             steps {
+//                 sh 'npm install' 
+                
+//             }
+//         }
+//         stage('Docker build') { 
+            
+//             steps {
+//                 withAWS(region: 'us-east-1', credentials: 'aws-creds') {
+//                     sh """
+//                     aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.us-east-1.amazonaws.com
+
+//                     docker build -t ${account_id}.dkr.ecr.us-east-1.amazonaws.com/${project}/${environment}/${component}:${appVersion} .
+
+//                     docker images
+
+//                     docker push ${account_id}.dkr.ecr.us-east-1.amazonaws.com/${project}/${environment}/${component}:${appVersion} 
+
+//                     """
+//                 }
+//             }
+//         }
+// //         stage('Deploy'){
+// //             steps{
+// //                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+// //                     withAWS(region: "${region}", credentials: 'aws-creds') {
+// //                         sh """
+// //                             aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
+// //                             cd helm
+// //                             sed -i "s|IMAGE_VERSION|${appVersion}|g" values-${environment}.yaml
+// //                             sh "kubectl get ns ${project} || kubectl create ns ${project}"
+
+// //                             helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
+// //                          """
+// //     }
+// // }
+
+// //             }
+// //         }
+      
+// //     }
+//                 stage('Deploy') {
+//                     steps {
+//                         withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+//                             withAWS(region: "${region}", credentials: 'aws-creds') {
+//                                 sh """
+//                                     aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
+//                                     kubectl get ns ${project} || kubectl create ns ${project}
+//                                     cd helm
+//                                     sed -i "s|IMAGE_VERSION|${env.appVersion}|g" values-${environment}.yaml
+//                                     helm lint .
+//                                     helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
+//                                 """
+//                             }
+//                         }
+//                     }
+//                 }
+
+
+//     post {
+//         always{
+//             echo "This sections runs always"
+//             deleteDir()
+            
+//         }
+//         success{
+//             echo "This section run when pipeline success"
+//         }
+//         failure{
+//             echo "This section run when pipeline failure"
+//         }
+
+
+//     }
+
+// }
+
+
 pipeline {
     agent {
         label 'AGENT-1'
-        
     }
-    options{
+
+    options {
         timeout(time: 30, unit: 'MINUTES')
         disableConcurrentBuilds()
-        //retry(1)
-
     }
+
     environment {
         DEBUG = 'true'
-        appVersion = '' // this will become global , we can use across pipeline
+        appVersion = '' // Global variable, set in first stage
         region = 'us-east-1'
         account_id = '557690626059'
         project = 'expense'
         component = 'backend'
         environment = 'dev'
     }
-   
+
     stages {
-        stage('Read the version') { 
+
+        stage('Read the version') {
             steps {
-                script{
+                script {
                     def packageJson = readJSON file: 'package.json'
-                    appVersion = packageJson.version
-                    echo "App version: ${appVersion}"
+                    env.appVersion = packageJson.version
+                    echo "App version: ${env.appVersion}"
                 }
             }
         }
 
-        stage('Install Dependencies') { 
+        stage('Install Dependencies') {
             steps {
-                sh 'npm install' 
-                
+                sh 'npm install'
             }
         }
-        stage('Docker build') { 
-            
+
+        stage('Docker build') {
             steps {
-                withAWS(region: 'us-east-1', credentials: 'aws-creds') {
+                withAWS(region: "${region}", credentials: 'aws-creds') {
                     sh """
-                    aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.us-east-1.amazonaws.com
+                        aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.us-east-1.amazonaws.com
 
-                    docker build -t ${account_id}.dkr.ecr.us-east-1.amazonaws.com/${project}/${environment}/${component}:${appVersion} .
+                        docker build -t ${account_id}.dkr.ecr.us-east-1.amazonaws.com/${project}/${environment}/${component}:${env.appVersion} .
 
-                    docker images
+                        docker images
 
-                    docker push ${account_id}.dkr.ecr.us-east-1.amazonaws.com/${project}/${environment}/${component}:${appVersion} 
-
+                        docker push ${account_id}.dkr.ecr.us-east-1.amazonaws.com/${project}/${environment}/${component}:${env.appVersion}
                     """
                 }
             }
         }
-//         stage('Deploy'){
-//             steps{
-//                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-//                     withAWS(region: "${region}", credentials: 'aws-creds') {
-//                         sh """
-//                             aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
-//                             cd helm
-//                             sed -i "s|IMAGE_VERSION|${appVersion}|g" values-${environment}.yaml
-//                             sh "kubectl get ns ${project} || kubectl create ns ${project}"
 
-//                             helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
-//                          """
-//     }
-// }
-
-//             }
-//         }
-      
-//     }
-                stage('Deploy') {
-                    steps {
-                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
-                            withAWS(region: "${region}", credentials: 'aws-creds') {
-                                sh """
-                                    aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
-                                    kubectl get ns ${project} || kubectl create ns ${project}
-                                    cd helm
-                                    sed -i "s|IMAGE_VERSION|${env.appVersion}|g" values-${environment}.yaml
-                                    helm lint .
-                                    helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
-                                """
-                            }
-                        }
+        stage('Deploy') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                    withAWS(region: "${region}", credentials: 'aws-creds') {
+                        sh """
+                            aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
+                            kubectl get ns ${project} || kubectl create ns ${project}
+                            cd helm
+                            sed -i "s|IMAGE_VERSION|${env.appVersion}|g" values-${environment}.yaml
+                            helm lint .
+                            helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
+                        """
                     }
                 }
-
-
-    post {
-        always{
-            echo "This sections runs always"
-            deleteDir()
-            
+            }
         }
-        success{
-            echo "This section run when pipeline success"
-        }
-        failure{
-            echo "This section run when pipeline failure"
-        }
-
-
     }
 
+    post {
+        always {
+            echo "This section runs always"
+            deleteDir()
+        }
+        success {
+            echo "This section runs when the pipeline succeeds"
+        }
+        failure {
+            echo "This section runs when the pipeline fails"
+        }
+    }
 }
