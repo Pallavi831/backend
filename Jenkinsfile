@@ -169,7 +169,7 @@ pipeline {
                     withAWS(region: "${region}", credentials: 'aws-creds') {
                         sh """
                             aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
-                            kubectl get ns ${project} || kubectl create ns ${project}
+                            
                             cd helm
                             sed -i "s|IMAGE_VERSION|${env.appVersion}|g" values-${environment}.yaml
                             helm lint .
