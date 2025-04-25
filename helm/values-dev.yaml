@@ -4,6 +4,6 @@ deployment:
   imageURL: 557690626059.dkr.ecr.us-east-1.amazonaws.com/expense/dev/backend
   imageVersion: IMAGE_VERSION
 hpa:
-  cpuutilization: 20
+  cpuUtilization: 20
   
   
