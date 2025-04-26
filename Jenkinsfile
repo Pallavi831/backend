@@ -56,9 +56,26 @@ pipeline {
             steps {
                 withAWS(region: "${region}", credentials: 'aws-creds') {
                     sh """
+                        # Update kubeconfig
                         aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
+                        if [ $? -ne 0 ]; then
+                            echo "EKS kubeconfig update failed!"
+                            exit 1
+                        fi
+
+                        # Debug: Check kubeconfig file
+                        kubectl config view
+
                         cd helm
+                        echo "Before sed:"
+                        cat values-${environment}.yaml
+
                         sed -i 's/IMAGE_VERSION/${env.appVersion}/g' values-${environment}.yaml
+
+                        echo "After sed:"
+                        cat values-${environment}.yaml
+
+                        # Deploy with Helm
                         helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
 
                     """
