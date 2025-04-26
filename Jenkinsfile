@@ -57,10 +57,10 @@ pipeline {
                 withAWS(region: "${region}", credentials: 'aws-creds') {
                     sh """
                         
-                       // aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
-                        // cd helm
-                        // sed -i 's/IMAGE_VERSION/${env.appVersion}/g' values-${environment}.yaml
-                        // helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
+                        aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
+                        cd helm
+                        sed -i 's/IMAGE_VERSION/${env.appVersion}/g' values-${environment}.yaml
+                        helm upgrade --install ${component} -n ${project} -f values-${environment}.yaml .
 
                     """
 
