@@ -57,12 +57,12 @@ pipeline {
                 withAWS(region: "${region}", credentials: 'aws-creds') {
                     sh """
                         
-                        aws eks update-kubeconfig --region "${region}" --name "${project}-${environment}-1"
-    
-                        if [ $? -ne 0 ]; then
-                            echo "EKS kubeconfig update failed!"
-                            exit 1
-                        fi
+                        aws eks update-kubeconfig --region ${region} --name ${project}-${environment}-1
+
+                            if [ $? -ne 0 ]; then
+                                echo "EKS kubeconfig update failed!"
+                                exit 1
+                            fi
 
                        
                         kubectl config view
