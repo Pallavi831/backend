@@ -22,6 +22,8 @@ spec:
         tier: backend
         project: expense
     spec:
+      imagePullSecrets:
+        - name: ecr-secret
       containers:
       - name: nginx
         image: "{{ .Values.deployment.imageURL }}:{{ .Values.deployment.imageVersion }}"
