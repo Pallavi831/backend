@@ -1,5 +1,5 @@
 ConfigMap:
-  db_host: mysql-dev.rushika.site
+  db_host: mysql-dev.rushika.site:3306
   
 deployment:
   imageURL: 557690626059.dkr.ecr.us-east-1.amazonaws.com/expense/dev/backend
