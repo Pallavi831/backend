@@ -6,6 +6,6 @@ deployment:
  
   imageVersion: IMAGE_VERSION
 hpa:
-  cpuUtilization: 20
+  cpuUtilization: 75
   
   
