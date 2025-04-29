@@ -63,14 +63,5 @@ module.exports = {
     deleteTransactionById
 };
 
-// // Create a connection pool for better performance and scalability
-// const pool = mysql.createPool({
-//     host: process.env.DB_HOST || dbcreds.DB_HOST,
-//     user: process.env.DB_USER || dbcreds.DB_USER,
-//     password: process.env.DB_PWD || dbcreds.DB_PWD,
-//     database: process.env.DB_DATABASE || dbcreds.DB_DATABASE,
-//     waitForConnections: true, // Allows the pool to wait for available connections
-//     connectionLimit: 10, // Number of connections allowed in the pool
-//     queueLimit: 0 // No limit for queued connections
-// });
+// this is just to test
 
