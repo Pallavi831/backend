@@ -54,7 +54,7 @@ pipeline {
             }
         }
 
-    }
+    
 
         stage('Trigger Deploy'){
             when { 
@@ -78,4 +78,4 @@ pipeline {
             echo "This section runs when the pipeline fails"
         }
     }
-
+}
