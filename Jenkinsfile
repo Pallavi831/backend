@@ -7,4 +7,4 @@ def configMap = [
 ]
 
 // echo "$env.BRANCH_NAME"
-nodeJSEKSPipeline(configMap)
+nodeJSEKSpipeline(configMap)
